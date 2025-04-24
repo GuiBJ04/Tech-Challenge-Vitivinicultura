@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+python-jose[cryptography]
+passlib[bcrypt]
+requests
+beautifulsoup4
+black
+flake8
