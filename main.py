@@ -21,17 +21,21 @@ def login(credentials: HTTPBasicCredentials = Depends(security_basic)):
     token = jwt.encode({"sub": credentials.username}, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}
 
-@app.get("/")
-def hello():
-    return "Hello Fast"
-
 @app.get("/dados-producao")
 def get_data_production(username: str = Depends(get_current_user)):
     try:
         url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
         scraper = Scraper(url)
         table = scraper.get_table()
-        return scraper.get_table()
+        headers = scraper.get_headers()
+        paragraphs = scraper.get_paragraphs()
+
+        return {
+            "url": url,
+            "titulos": headers,
+            "paragrafos": paragraphs,
+            "dados": table
+        }
     except Exception as e:
         return f"Error: {e}"
     
@@ -49,19 +53,16 @@ def get_data_processing(username: str = Depends(get_current_user)):
         for url in urls:
             scraper = Scraper(url)
             table = scraper.get_table()
+            headers = scraper.get_headers()
+            paragraphs = scraper.get_paragraphs()
 
-            nome_categoria = get_category_name(url)
-            if nome_categoria != '':
-                resultados.append({
-                    "url": url,
-                    "categoria": nome_categoria,
-                    "dados": table
-                })
-            else:
-                 resultados.append({
-                    "url": url,
-                    "dados": table
-                })
+            resultados.append({
+                "url": url,
+                "categoria": get_category_name(url),
+                "titulos": headers,
+                "paragrafos": paragraphs,
+                "dados": table
+            })
 
         return resultados
     except Exception as e:
@@ -74,9 +75,13 @@ def get_data_commercialization(username: str = Depends(get_current_user)):
 
         scraper = Scraper(url)
         table = scraper.get_table()
+        headers = scraper.get_headers()
+        paragraphs = scraper.get_paragraphs()
 
         return {
             "url": url,
+            "titulos": headers,
+            "paragrafos": paragraphs,
             "dados": table
         }
     except Exception as e:
@@ -97,19 +102,16 @@ def get_data_production(username: str = Depends(get_current_user)):
         for url in urls:
             scraper = Scraper(url)
             table = scraper.get_table()
+            headers = scraper.get_headers()
+            paragraphs = scraper.get_paragraphs()
 
-            nome_categoria = get_category_name(url)
-            if nome_categoria != '':
-                resultados.append({
-                    "url": url,
-                    "categoria": nome_categoria,
-                    "dados": table
-                })
-            else:
-                 resultados.append({
-                    "url": url,
-                    "dados": table
-                })
+            resultados.append({
+                "url": url,
+                "categoria": get_category_name(url),
+                "titulos": headers,
+                "paragrafos": paragraphs,
+                "dados": table
+            })
 
         return resultados
     except Exception as e:
