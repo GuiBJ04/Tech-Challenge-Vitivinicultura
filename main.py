@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from jose import jwt, JWTError
-from scrape import get_title, get_content
 from security import get_current_user
 from config import SECRET_KEY, ALGORITHM
 from database import users
+from scrape import Scraper
+from helpers import get_category_name
+from datetime import datetime, timedelta, timezone
 
 app = FastAPI()
 
@@ -16,8 +18,13 @@ security_basic = HTTPBasic()
 def login(credentials: HTTPBasicCredentials = Depends(security_basic)):
     if credentials.username not in users or users[credentials.username] != credentials.password:
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
-
-    token = jwt.encode({"sub": credentials.username}, SECRET_KEY, algorithm=ALGORITHM)
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": credentials.username,
+        "iat": now,
+        "exp": now + timedelta(hours=1)
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "token_type": "bearer"}
 
 @app.get("/dados-producao")
