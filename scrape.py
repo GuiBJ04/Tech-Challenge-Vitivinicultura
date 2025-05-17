@@ -8,25 +8,6 @@ class Scraper:
             self.soup = BeautifulSoup(self.response.text, 'html.parser')
         except Exception as e:
             raise Exception(f"Erro ao inicializar Scraper: {e}")
-
-    def get_title(self):
-        try:
-            title = self.soup.title.string.strip()
-            return title
-        except Exception as e:
-            return f"Error: {e}"
-        
-    def get_content(self):
-        try:
-            headers = []
-            for header_tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
-                for header in self.soup.find_all(header_tag):
-                    headers.append(header.get_text(strip=True))
-
-            paragraphs = [p.get_text(strip=True) for p in self.soup.find_all('p')]
-            return headers, paragraphs
-        except Exception as e:  
-            return f"Error: {e}"
         
     def get_table(self):
         try: 
