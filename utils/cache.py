@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from models.scraped_data import ScrapedData
 from datetime import datetime
 
-def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragrafos: list, dados: list):
+def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragrafos: list, dados: list, ano: int = None):
     dados_json = json.dumps(dados, ensure_ascii=False)
-    registro = db.query(ScrapedData).filter_by(url=url).first()
+    registro = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
 
     if registro:
         registro.titulos = json.dumps(titulos, ensure_ascii=False)
@@ -15,6 +15,7 @@ def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragr
     else:
         registro = ScrapedData(
             url=url,
+            ano=ano,
             categoria=categoria,
             titulos=json.dumps(titulos, ensure_ascii=False),
             paragrafos=json.dumps(paragrafos, ensure_ascii=False),
@@ -23,3 +24,4 @@ def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragr
         db.add(registro)
 
     db.commit()
+

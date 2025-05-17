@@ -10,6 +10,7 @@ class ScrapedData(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String(255), unique=True, nullable=False)
+    ano = Column(Integer, nullable=True)
     categoria = Column(String(100))
     titulos = Column(Text)
     paragrafos = Column(Text)

@@ -10,6 +10,7 @@ from database import SessionLocal
 from models.scraped_data import ScrapedData
 from utils.cache import salvar_scraping
 import json
+from fastapi import Query
 
 app = FastAPI()
 
@@ -26,9 +27,18 @@ def login(credentials: HTTPBasicCredentials = Depends(security_basic)):
     return {"access_token": token, "token_type": "bearer"}
 
 @app.get("/dados-producao")
-def get_data_production(username: str = Depends(get_current_user)):
+def get_data_production(
+    username: str = Depends(get_current_user),
+    ano: int = Query(None, ge=1970, le=2023)
+):
     try:
-        url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
+        base_url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
+
+        if ano:
+            url = f"{base_url}&ano={ano}"
+        else:
+            url = base_url
+
         db = SessionLocal()
 
         scraper = Scraper(url)
@@ -36,21 +46,23 @@ def get_data_production(username: str = Depends(get_current_user)):
         headers = scraper.get_headers()
         paragraphs = scraper.get_paragraphs()
 
-        salvar_scraping(db, url, "produção", headers, paragraphs, table)
+        salvar_scraping(db, url, "produção", headers, paragraphs, table, ano)
 
         return {
             "url": url,
+            "ano": ano,
             "titulos": headers,
             "paragrafos": paragraphs,
             "dados": table
         }
     except Exception:
-        cache = db.query(ScrapedData).filter_by(url=url).first()
+        cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
 
         if cache:
             return {
                 "fonte": "cache",
                 "url": url,
+                "ano": ano,
                 "titulos": json.loads(cache.titulos),
                 "paragrafos": json.loads(cache.paragrafos),
                 "dados": json.loads(cache.dados_json)
@@ -60,7 +72,10 @@ def get_data_production(username: str = Depends(get_current_user)):
 
     
 @app.get("/dados-processamento")
-def get_data_processing(username: str = Depends(get_current_user)):
+def get_data_processing(
+    username: str = Depends(get_current_user),
+    ano: int = Query(None, ge=1970, le=2023)
+):
     urls = [
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03',
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03',
@@ -72,6 +87,9 @@ def get_data_processing(username: str = Depends(get_current_user)):
     resultados = []
 
     for url in urls:
+
+        url = f"{url}&ano={ano}" if ano else url
+
         try:
             scraper = Scraper(url)
             table = scraper.get_table()
@@ -79,22 +97,24 @@ def get_data_processing(username: str = Depends(get_current_user)):
             paragraphs = scraper.get_paragraphs()
             categoria = get_category_name(url)
 
-            salvar_scraping(db, url, categoria, headers, paragraphs, table)
+            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
 
             resultados.append({
                 "fonte": "web",
                 "url": url,
+                "ano": ano,
                 "categoria": categoria,
                 "titulos": headers,
                 "paragrafos": paragraphs,
                 "dados": table
             })
         except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url).first()
+            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
             if cache:
                 resultados.append({
                     "fonte": "cache",
                     "url": url,
+                    "ano": ano,
                     "categoria": cache.categoria,
                     "titulos": json.loads(cache.titulos),
                     "paragrafos": json.loads(cache.paragrafos),
@@ -107,8 +127,17 @@ def get_data_processing(username: str = Depends(get_current_user)):
 
     
 @app.get("/dados-comercializacao")
-def get_data_commercialization(username: str = Depends(get_current_user)):
-    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
+def get_data_commercialization(
+    username: str = Depends(get_current_user),
+    ano: int = Query(None, ge=1970, le=2023)
+):
+    base_url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
+
+    if ano:
+        url = f"{base_url}&ano={ano}"
+    else:
+        url = base_url
+
     db = SessionLocal()
 
     try:
@@ -117,11 +146,12 @@ def get_data_commercialization(username: str = Depends(get_current_user)):
         headers = scraper.get_headers()
         paragraphs = scraper.get_paragraphs()
 
-        salvar_scraping(db, url, "comercializacao", headers, paragraphs, table)
+        salvar_scraping(db, url, "comercializacao", headers, paragraphs, table, ano)
 
         return {
             "fonte": "web",
             "url": url,
+            "ano": ano,
             "categoria": "comercializacao",
             "titulos": headers,
             "paragrafos": paragraphs,
@@ -129,11 +159,12 @@ def get_data_commercialization(username: str = Depends(get_current_user)):
         }
 
     except Exception:
-        cache = db.query(ScrapedData).filter_by(url=url).first()
+        cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
         if cache:
             return {
                 "fonte": "cache",
                 "url": url,
+                "ano": ano,
                 "categoria": cache.categoria,
                 "titulos": json.loads(cache.titulos),
                 "paragrafos": json.loads(cache.paragrafos),
@@ -142,7 +173,10 @@ def get_data_commercialization(username: str = Depends(get_current_user)):
         raise HTTPException(status_code=503, detail="Fonte indisponível e sem cache local.")
     
 @app.get("/dados-importacao")
-def get_data_import(username: str = Depends(get_current_user)):
+def get_data_import(
+    username: str = Depends(get_current_user),
+    ano: int = Query(None, ge=1970, le=2024)
+):
     urls = [
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05',
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05',
@@ -155,6 +189,9 @@ def get_data_import(username: str = Depends(get_current_user)):
     resultados = []
 
     for url in urls:
+        
+        url = f"{url}&ano={ano}" if ano else url
+
         try:
             scraper = Scraper(url)
             table = scraper.get_table()
@@ -162,11 +199,12 @@ def get_data_import(username: str = Depends(get_current_user)):
             paragraphs = scraper.get_paragraphs()
             categoria = get_category_name(url)
 
-            salvar_scraping(db, url, categoria, headers, paragraphs, table)
+            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
 
             resultados.append({
                 "fonte": "web",
                 "url": url,
+                "ano": ano,
                 "categoria": categoria,
                 "titulos": headers,
                 "paragrafos": paragraphs,
@@ -174,11 +212,12 @@ def get_data_import(username: str = Depends(get_current_user)):
             })
 
         except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url).first()
+            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
             if cache:
                 resultados.append({
                     "fonte": "cache",
                     "url": url,
+                    "ano": ano,
                     "categoria": cache.categoria,
                     "titulos": json.loads(cache.titulos),
                     "paragrafos": json.loads(cache.paragrafos),
@@ -190,7 +229,10 @@ def get_data_import(username: str = Depends(get_current_user)):
     return resultados
     
 @app.get("/dados-exportacao")
-def get_data_export(username: str = Depends(get_current_user)):
+def get_data_export(
+    username: str = Depends(get_current_user),
+    ano: int = Query(None, ge=1970, le=2024)
+):
     urls = [
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06',
         'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06',
@@ -202,6 +244,8 @@ def get_data_export(username: str = Depends(get_current_user)):
     resultados = []
 
     for url in urls:
+        url = f"{url}&ano={ano}" if ano else url
+
         try:
             scraper = Scraper(url)
             table = scraper.get_table()
@@ -209,11 +253,12 @@ def get_data_export(username: str = Depends(get_current_user)):
             paragraphs = scraper.get_paragraphs()
             categoria = get_category_name(url)
 
-            salvar_scraping(db, url, categoria, headers, paragraphs, table)
+            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
 
             resultados.append({
                 "fonte": "web",
                 "url": url,
+                "ano": ano,
                 "categoria": categoria,
                 "titulos": headers,
                 "paragrafos": paragraphs,
@@ -221,11 +266,12 @@ def get_data_export(username: str = Depends(get_current_user)):
             })
 
         except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url).first()
+            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
             if cache:
                 resultados.append({
                     "fonte": "cache",
                     "url": url,
+                    "ano": ano,
                     "categoria": cache.categoria,
                     "titulos": json.loads(cache.titulos),
                     "paragrafos": json.loads(cache.paragrafos),
