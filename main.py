@@ -9,6 +9,7 @@ from helpers import get_category_name
 from database import SessionLocal
 from models.scraped_data import ScrapedData
 from utils.cache import salvar_scraping
+import json
 
 app = FastAPI()
 
