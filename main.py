@@ -3,11 +3,11 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from jose import jwt, JWTError
 from security import get_current_user
 from config import SECRET_KEY, ALGORITHM
-from database import users
 from scrape import Scraper
 from helpers import get_category_name
-from database import SessionLocal
+from database import Session, SessionLocal
 from models.scraped_data import ScrapedData
+from models.user import UserData
 from utils.cache import salvar_scraping
 import json
 from datetime import datetime, timedelta
@@ -22,10 +22,30 @@ app = FastAPI(
 # Autenticação
 security_basic = HTTPBasic()
 
+@app.post("/register")
+def registro(username: str, password: str):
+    db = Session()
+
+    user_exists = db.query(UserData).filter_by(user=username).first()
+    if user_exists:
+        db.close()
+        raise HTTPException(status_code=400, detail="Usuário já existe")
+
+    new_user = UserData(user=username, password=password)
+    db.add(new_user)
+    db.commit()
+    db.close()
+
+    return {"message": "Usuário criado com sucesso"}
+
 # Endpoint de login com HTTP Basic
-@app.post("/login")
+@app.get("/login")
 def login(credentials: HTTPBasicCredentials = Depends(security_basic)):
-    if credentials.username not in users or users[credentials.username] != credentials.password:
+    db = Session()
+    user = db.query(UserData).filter_by(user=credentials.username).first()
+
+    if not user or user.password != credentials.password:
+        db.close()
         raise HTTPException(status_code=401, detail="Credenciais inválidas")
 
     sao_paulo_tz = ZoneInfo("America/Sao_Paulo")
@@ -38,13 +58,14 @@ def login(credentials: HTTPBasicCredentials = Depends(security_basic)):
         "exp": int(expiration.timestamp())
     }
 
-    token = jwt.encode({"sub": credentials.username}, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    db.close()
+
     return {
         "access_token": token,
         "token_type": "bearer",
-        'expired_at': expiration.isoformat()
+        "expired_at": expiration.isoformat()
     }
-
 
 @app.get(
     "/dados-producao",

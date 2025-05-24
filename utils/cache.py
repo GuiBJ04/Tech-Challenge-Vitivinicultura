@@ -1,6 +1,7 @@
 import json
 from sqlalchemy.orm import Session
 from models.scraped_data import ScrapedData
+from models.user import UserData
 from datetime import datetime
 
 def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragrafos: list, dados: list, ano: int = None):
@@ -24,4 +25,3 @@ def salvar_scraping(db: Session, url: str, categoria: str, titulos: list, paragr
         db.add(registro)
 
     db.commit()
-

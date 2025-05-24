@@ -3,9 +3,10 @@ from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./scrape_cache.db"
 
+SQLALCHEMY_USER_DATABASE_URL = "sqlite:///./user_cache.db"
+
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-users = {
-    "admin": "admin"
-}
+dbCreation = create_engine(SQLALCHEMY_USER_DATABASE_URL, connect_args={"check_same_thread": False})
+Session = sessionmaker(autocommit=False, autoflush=False, bind=dbCreation)
