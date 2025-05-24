@@ -12,3 +12,6 @@ __pycache__/
 # Ignorar arquivos do sistema
 .DS_Store
 Thumbs.db
+
+# Ignorar banco de dados
+scrape_cache.db
