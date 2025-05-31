@@ -25,7 +25,6 @@ O projeto está estruturado da seguinte forma:
 TECH-CHALLENGE-VITIVINICULTURA/
 ├── api/
 │   ├── auth/
-│   │   ├── pycache/
 │   │   ├── auth.py
 │   │   └── scraped_data.py
 ├── db/
@@ -37,17 +36,13 @@ TECH-CHALLENGE-VITIVINICULTURA/
 │   ├── scraped_data.py
 │   └── user.py
 ├── repository/
-│   ├── pycache/
 │   └── scraped_data.py
 ├── security/
-│   ├── pycache/
 │   ├── config.py
 │   └── security.py
 ├── services/
-│   ├── pycache/
 │   └── scrape.py
 ├── utils/
-│   ├── pycache/
 │   └── helpers.py
 ├── .gitignore
 ├── main.py
