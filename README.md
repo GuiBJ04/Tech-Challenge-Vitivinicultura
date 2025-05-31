@@ -60,18 +60,13 @@ TECH-CHALLENGE-VITIVINICULTURA/
 A aplicação utiliza:
 
 * **FastAPI** para criação de endpoints.
-
 * **SQLite** com **SQLAlchemy** para persistência.
-
 * **JWT** para autenticação.
-
 * **BeautifulSoup** + **Requests** para web scraping.
-
 
 ## Instalação
 
 1. **Clonar o repositório** (ou copiar o arquivo `app.py` e demais arquivos necessários).
-
 2. **Criar e ativar um ambiente virtual (opcional, mas recomendado)**:
    ```bash
    python -m venv venv
@@ -84,7 +79,6 @@ A aplicação utiliza:
    ```
 
 ## Como Executar
-
 1. Inicialize o banco de dados:
 
 ```
@@ -123,4 +117,23 @@ A aplicação Flask iniciará em modo debug, por padrão em `http://127.0.0.1:50
 } 
 ```
 
+### /dados-processamento
+* Método: GET
+* Acesso: Protegido (JWT)
+* Descrição: Coleta e retorna dados sobre o processamento vitivinícola.
 
+### Autenticação
+
+A API utiliza JWT (JSON Web Token) para proteger os endpoints:
+
+1. Faça login via /login com o usuário:
+* username: admin
+* password: secret
+
+2. Use o token retornado nos headers de autenticação:
+```http
+Authorization: Bearer <seu-token-aqui>
+```
+
+### Licença
+Distribuído sob a licença MIT. Veja o arquivo LICENSE para mais informações.
