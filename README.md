@@ -96,21 +96,56 @@ A aplicação Flask iniciará em modo debug, por padrão em `http://127.0.0.1:50
 
 ## Endpoints
 
+### /register
+- * Método: POST
+- * Acesso: Público
+- * Descrição: Retorna mensagem sob status de criação do usuário. 
+- * Corpo (JSON):
+  ```json
+  {
+    "username": "username",
+    "password": "password"
+  }
+  ```
+
+Caso seja um novo usuário, retorna:
+```json
+{
+  "message": "Usuário criado com sucesso"
+}
+```
+
+Caso usuário já exista, retorna:
+```json
+{
+  "detail": "Usuário já existe"
+}
+```
+
 ### /login
-* Método: POST
-* Acesso: Público
-* Descrição: Retorna um token JWT válido com credenciais de teste.
+- * Método: POST
+- * Acesso: Protegido (HTTPBasic)
+- * Descrição: Retorna um token JWT válido com credenciais de teste.
+
+```json
+{
+  "access_token": "token",
+  "token_type": "bearer",
+  "expired_at": "..."
+}
+```
 
 ### /dados-producao
-* Método: GET
-* Acesso: Protegido (JWT)
-* Descrição: Coleta e retorna os dados de produção vitivinícola do site da Embrapa para um determinado ano.
-* Query Parameters:
-    **ano: Ano da produção (1970–2023)
-* Resposta:
+- * Método: GET
+- * Acesso: Protegido (JWT)
+- * Descrição: Coleta e retorna os dados de produção vitivinícola do site da Embrapa para um determinado ano.
+- * Query Parameters:
+    - * ano: Ano da produção (1970–2023)
+- * Resposta:
  ```json
  {
   "url": "...",
+  "ano": "..."
   "titulos": [...],
   "paragrafos": [...],
   "dados": [...]
@@ -118,22 +153,69 @@ A aplicação Flask iniciará em modo debug, por padrão em `http://127.0.0.1:50
 ```
 
 ### /dados-processamento
-* Método: GET
-* Acesso: Protegido (JWT)
-* Descrição: Coleta e retorna dados sobre o processamento vitivinícola.
-
-### Autenticação
-
-A API utiliza JWT (JSON Web Token) para proteger os endpoints:
-
-1. Faça login via /login com o usuário:
-* username: admin
-* password: secret
-
-2. Use o token retornado nos headers de autenticação:
-```http
-Authorization: Bearer <seu-token-aqui>
+- * Método: GET
+- * Acesso: Protegido (JWT)
+- * Descrição: Retorna dados de processamento de produtos da vitivinicultura com base na Embrapa. É possível filtrar os dados por ano (1970 a 2023). Se o site estiver offline, dados são retornados do cache local. 
+- * Query Parameters:
+    - * ano: Ano da produção (1970–2023)
+- * Resposta:
+ ```json
+ {
+  "url": "...",
+  "ano": "..."
+  "titulos": [...],
+  "paragrafos": [...],
+  "dados": [...]
+} 
 ```
 
-### Licença
-Distribuído sob a licença MIT. Veja o arquivo LICENSE para mais informações.
+### /dados-importacao
+- * Método: GET
+- * Acesso: Protegido (JWT)
+- * Descrição: Retorna dados de importação de produtos da vitivinicultura com base na Embrapa. É possível filtrar os dados por ano (1970 a 2024). Se o site estiver offline, dados são retornados do cache local. 
+- * Query Parameters:
+    - * ano: Ano da produção (1970–2023)
+- * Resposta:
+ ```json
+ {
+  "url": "...",
+  "ano": "..."
+  "titulos": [...],
+  "paragrafos": [...],
+  "dados": [...]
+} 
+```
+
+### /dados-comercializacao
+- * Método: GET
+- * Acesso: Protegido (JWT)
+- * Descrição: Retorna dados de comercializacao de produtos da vitivinicultura com base na Embrapa. É possível filtrar os dados por ano (1970 a 2023). Se o site estiver offline, dados são retornados do cache local.
+- * Query Parameters:
+    - * ano: Ano da produção (1970–2023)
+- * Resposta:
+ ```json
+ {
+  "url": "...",
+  "ano": "..."
+  "titulos": [...],
+  "paragrafos": [...],
+  "dados": [...]
+} 
+```
+
+### /dados-importacao
+- * Método: GET
+- * Acesso: Protegido (JWT)
+- * Descrição: Retorna dados de exportação de produtos da vitivinicultura com base na Embrapa. É possível filtrar os dados por ano (1970 a 2024). Se o site estiver offline, dados são retornados do cache local. 
+- * Query Parameters:
+    - * ano: Ano da produção (1970–2023)
+- * Resposta:
+ ```json
+ {
+  "url": "...",
+  "ano": "..."
+  "titulos": [...],
+  "paragrafos": [...],
+  "dados": [...]
+} 
+```
