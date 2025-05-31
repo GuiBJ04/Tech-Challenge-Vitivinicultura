@@ -8,14 +8,15 @@ Este projeto realiza o scraping de dados vitivinícolas diretamente do portal da
 - [Instalação](#instalação)
 - [Como Executar](#como-executar)
 - [Endpoints](#endpoints)
-  - [Raiz (`/`)](#raiz-)
+  - [Registro de usuário (`/register`)](#register-)
   - [Login (`/login`)](#login-)
-  - [Predict (`/predict`)](#predict-)
-  - [List Predictions (`/predictions`)](#list-predictions-)
-- [Autenticação](#autenticação)
-- [Exemplo de Uso](#exemplo-de-uso)
+  - [Dados de Produção (`/dados-producao`)](#dados-producao-)
+  - [Dados de processamento (`/dados-processamento`)](#dados-processamento-)
+  - [Dados de importação (`/dados-importacao`)](#dados-importacao-)
+  - [Dados de comercialização (`/dados-comercializacao`)](#dados-comercializacao-)
+  - [Dados de Importação (`/dados-importacao`)](#dados-importacao-)
 
-## Arquitetura
+# Arquitetura
 
 O projeto é estruturado da seguinte forma:
 
