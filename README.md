@@ -57,3 +57,48 @@ TECH-CHALLENGE-VITIVINICULTURA/
 
 ```
 
+A aplicação utiliza:
+
+* **FastAPI** para criação de endpoints.
+
+* **SQLite** com **SQLAlchemy** para persistência.
+
+* **JWT** para autenticação.
+
+* **BeautifulSoup** + **Requests** para web scraping.
+
+
+# Instalação
+
+1. **Clonar o repositório** (ou copiar o arquivo `app.py` e demais arquivos necessários).
+
+2. **Criar e ativar um ambiente virtual (opcional, mas recomendado)**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # Em sistemas Unix
+   # ou, no Windows:
+   # venv\Scripts\activate
+   ```
+3. **Instalar as dependências**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Como Executar
+
+1. Inicialize o banco de dados:
+
+```
+python db/init_db.py
+```
+
+2. Execute o servidor FastAPI:
+```
+uvicorn main:app --reload
+```
+
+A aplicação Flask iniciará em modo debug, por padrão em `http://127.0.0.1:5000/`.
+
+3. Acesse a documentação interativa da API: `htt/p://127.0.0.1:8000/docs`.
+
+
