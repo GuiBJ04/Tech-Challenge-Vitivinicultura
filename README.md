@@ -19,6 +19,8 @@ Este projeto realiza o scraping de dados vitivinícolas diretamente do portal da
 
 O projeto é estruturado da seguinte forma:
 
+```
+
 TECH-CHALLENGE-VITIVINICULTURA/
 ├── api/
 │   ├── auth/
@@ -52,4 +54,6 @@ TECH-CHALLENGE-VITIVINICULTURA/
 ├── requirements.txt
 ├── scrape_cache.db
 └── user_cache.db
+
+```
 
