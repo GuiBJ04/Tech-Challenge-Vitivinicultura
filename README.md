@@ -15,7 +15,7 @@ Este projeto realiza o scraping de dados vitivinícolas diretamente do portal da
 - [Autenticação](#autenticação)
 - [Exemplo de Uso](#exemplo-de-uso)
 
-# Arquitetura
+## Arquitetura
 
 O projeto é estruturado da seguinte forma:
 
@@ -68,7 +68,7 @@ A aplicação utiliza:
 * **BeautifulSoup** + **Requests** para web scraping.
 
 
-# Instalação
+## Instalação
 
 1. **Clonar o repositório** (ou copiar o arquivo `app.py` e demais arquivos necessários).
 
@@ -76,8 +76,7 @@ A aplicação utiliza:
    ```bash
    python -m venv venv
    source venv/bin/activate   # Em sistemas Unix
-   # ou, no Windows:
-   # venv\Scripts\activate
+   venv\Scripts\activate # Em sistemas Windows
    ```
 3. **Instalar as dependências**:
    ```bash
@@ -100,5 +99,28 @@ uvicorn main:app --reload
 A aplicação Flask iniciará em modo debug, por padrão em `http://127.0.0.1:5000/`.
 
 3. Acesse a documentação interativa da API: `htt/p://127.0.0.1:8000/docs`.
+
+## Endpoints
+
+### /login
+* Método: POST
+* Acesso: Público
+* Descrição: Retorna um token JWT válido com credenciais de teste.
+
+### /dados-producao
+* Método: GET
+* Acesso: Protegido (JWT)
+* Descrição: Coleta e retorna os dados de produção vitivinícola do site da Embrapa para um determinado ano.
+* Query Parameters:
+    **ano: Ano da produção (1970–2023)
+* Resposta:
+ ```json
+ {
+  "url": "...",
+  "titulos": [...],
+  "paragrafos": [...],
+  "dados": [...]
+} 
+```
 
 
