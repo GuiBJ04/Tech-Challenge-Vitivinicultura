@@ -18,7 +18,7 @@ Este projeto realiza o scraping de dados vitivinícolas diretamente do portal da
 
 # Arquitetura
 
-O projeto é estruturado da seguinte forma:
+O projeto está estruturado da seguinte forma:
 
 ```
 
