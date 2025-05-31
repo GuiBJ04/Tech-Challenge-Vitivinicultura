@@ -15,3 +15,4 @@ Thumbs.db
 
 # Ignorar banco de dados
 scrape_cache.db
+user_cache.db

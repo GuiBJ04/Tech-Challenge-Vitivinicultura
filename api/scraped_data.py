@@ -76,53 +76,53 @@ def get_data_processing(
         default=1970,
         description="Ano da produção vitivinícola (entre 1970 e 2023)",
         ge=1970,
-        le=2023
-    )
+        le=2023),
+        option: int = Query(
+        default=1,
+        description="1: Viniferas, 2: Americanas e híbridas, 3: Uvas de mesa, 4: Sem classificação",
+        ge=1,
+        le=4)
 ):
     urls = [
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03',
-    ]
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_03&subopcao=subopt_01',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_03&subopcao=subopt_02',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_03&subopcao=subopt_03',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_03&subopcao=subopt_04'
+        ]
 
     db = SessionLocal()
     resultados = []
 
-    for url in urls:
+    try:
+        scraper = Scraper(urls[option-1])
+        table = scraper.get_table()
+        headers = scraper.get_headers()
+        paragraphs = scraper.get_paragraphs()
+        categoria = get_category_name(urls[option-1])
 
-        url = f"{url}&ano={ano}" if ano else url
+        salvar_scraping(db, urls[option-1], categoria, headers, paragraphs, table, ano)
 
-        try:
-            scraper = Scraper(url)
-            table = scraper.get_table()
-            headers = scraper.get_headers()
-            paragraphs = scraper.get_paragraphs()
-            categoria = get_category_name(url)
-
-            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
-
+        resultados.append({
+            "fonte": "web",
+            "url": urls[option-1],
+            "ano": ano,
+            "categoria": categoria,
+            "titulos": headers,
+            "paragrafos": paragraphs,
+            "dados": table
+        })
+    except Exception:
+        cache = db.query(ScrapedData).filter_by(url=urls[option-1], ano=ano).first()
+        if cache:
             resultados.append({
-                "fonte": "web",
-                "url": url,
+                "fonte": "cache",
+                "url": urls[option-1],
                 "ano": ano,
-                "categoria": categoria,
-                "titulos": headers,
-                "paragrafos": paragraphs,
-                "dados": table
+                "categoria": cache.categoria,
+                "titulos": json.loads(cache.titulos),
+                "paragrafos": json.loads(cache.paragrafos),
+                "dados": json.loads(cache.dados_json)
             })
-        except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
-            if cache:
-                resultados.append({
-                    "fonte": "cache",
-                    "url": url,
-                    "ano": ano,
-                    "categoria": cache.categoria,
-                    "titulos": json.loads(cache.titulos),
-                    "paragrafos": json.loads(cache.paragrafos),
-                    "dados": json.loads(cache.dados_json)
-                })
 
     if not resultados:
         raise HTTPException(status_code=503, detail="Nenhuma fonte disponível ou cache encontrado.")
@@ -194,57 +194,58 @@ def get_data_import(
     username: str = Depends(get_current_user),
         ano: int = Query(
         default=1970,
-        description="Ano da produção vitivinícola (entre 1970 e 2023)",
+        description="Ano da produção vitivinícola (entre 1970 e 2024)",
         ge=1970,
         le=2024
-    )
+    ),
+    option: int = Query(
+        default=1,
+        description="1: Vinhos de mesa, 2: Espumantes, 3: Uvas frescas, 4: Uvas passas, 5: Suco de uva",
+        ge=1,
+        le=5)
 ):
     urls = [
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05',
-    ]
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_05&subopcao=subopt_01',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_05&subopcao=subopt_02',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_05&subopcao=subopt_03',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_05&subopcao=subopt_04',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_05&subopcao=subopt_05'
+        ]
 
     db = SessionLocal()
     resultados = []
 
-    for url in urls:
-        
-        url = f"{url}&ano={ano}" if ano else url
+    try:
+        scraper = Scraper(urls[option-1])
+        table = scraper.get_table()
+        headers = scraper.get_headers()
+        paragraphs = scraper.get_paragraphs()
+        categoria = get_category_name(urls[option-1])
 
-        try:
-            scraper = Scraper(url)
-            table = scraper.get_table()
-            headers = scraper.get_headers()
-            paragraphs = scraper.get_paragraphs()
-            categoria = get_category_name(url)
+        salvar_scraping(db, urls[option-1], categoria, headers, paragraphs, table, ano)
 
-            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
+        resultados.append({
+            "fonte": "web",
+            "url": urls[option-1],
+            "ano": ano,
+            "categoria": categoria,
+            "titulos": headers,
+            "paragrafos": paragraphs,
+            "dados": table
+        })
 
+    except Exception:
+        cache = db.query(ScrapedData).filter_by(url=urls[option-1], ano=ano).first()
+        if cache:
             resultados.append({
-                "fonte": "web",
-                "url": url,
+                "fonte": "cache",
+                "url": urls[option-1],
                 "ano": ano,
-                "categoria": categoria,
-                "titulos": headers,
-                "paragrafos": paragraphs,
-                "dados": table
+                "categoria": cache.categoria,
+                "titulos": json.loads(cache.titulos),
+                "paragrafos": json.loads(cache.paragrafos),
+                "dados": json.loads(cache.dados_json)
             })
-
-        except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
-            if cache:
-                resultados.append({
-                    "fonte": "cache",
-                    "url": url,
-                    "ano": ano,
-                    "categoria": cache.categoria,
-                    "titulos": json.loads(cache.titulos),
-                    "paragrafos": json.loads(cache.paragrafos),
-                    "dados": json.loads(cache.dados_json)
-                })
 
     if not resultados:
         raise HTTPException(status_code=503, detail="Nenhuma fonte disponível ou cache encontrado.")
@@ -260,55 +261,57 @@ def get_data_export(
     username: str = Depends(get_current_user),
         ano: int = Query(
         default=1970,
-        description="Ano da produção vitivinícola (entre 1970 e 2023)",
+        description="Ano da produção vitivinícola (entre 1970 e 2024)",
         ge=1970,
         le=2024
-    )
+    ),
+    option: int = Query(
+        default=1,
+        description="1: Vinhos de mesa, 2: Espumantes, 3: Uvas frescas, 4: Suco de uva",
+        ge=1,
+        le=4)
 ):
     urls = [
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06',
-        'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06',
-    ]
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_06&subopcao=subopt_01',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_06&subopcao=subopt_02',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_06&subopcao=subopt_03',
+            f'http://vitibrasil.cnpuv.embrapa.br/index.php?ano={ano}&opcao=opt_06&subopcao=subopt_04'
+        ]
 
     db = SessionLocal()
     resultados = []
 
-    for url in urls:
-        url = f"{url}&ano={ano}" if ano else url
+    try:
+        scraper = Scraper(urls[option-1])
+        table = scraper.get_table()
+        headers = scraper.get_headers()
+        paragraphs = scraper.get_paragraphs()
+        categoria = get_category_name(urls[option-1])
 
-        try:
-            scraper = Scraper(url)
-            table = scraper.get_table()
-            headers = scraper.get_headers()
-            paragraphs = scraper.get_paragraphs()
-            categoria = get_category_name(url)
+        salvar_scraping(db, urls[option-1], categoria, headers, paragraphs, table, ano)
 
-            salvar_scraping(db, url, categoria, headers, paragraphs, table, ano)
+        resultados.append({
+            "fonte": "web",
+            "url": urls[option-1],
+            "ano": ano,
+            "categoria": categoria,
+            "titulos": headers,
+            "paragrafos": paragraphs,
+            "dados": table
+        })
 
+    except Exception:
+        cache = db.query(ScrapedData).filter_by(url=urls[option-1], ano=ano).first()
+        if cache:
             resultados.append({
-                "fonte": "web",
-                "url": url,
+                "fonte": "cache",
+                "url": urls[option-1],
                 "ano": ano,
-                "categoria": categoria,
-                "titulos": headers,
-                "paragrafos": paragraphs,
-                "dados": table
+                "categoria": cache.categoria,
+                "titulos": json.loads(cache.titulos),
+                "paragrafos": json.loads(cache.paragrafos),
+                "dados": json.loads(cache.dados_json)
             })
-
-        except Exception:
-            cache = db.query(ScrapedData).filter_by(url=url, ano=ano).first()
-            if cache:
-                resultados.append({
-                    "fonte": "cache",
-                    "url": url,
-                    "ano": ano,
-                    "categoria": cache.categoria,
-                    "titulos": json.loads(cache.titulos),
-                    "paragrafos": json.loads(cache.paragrafos),
-                    "dados": json.loads(cache.dados_json)
-                })
 
     if not resultados:
         raise HTTPException(status_code=503, detail="Nenhuma fonte disponível ou cache encontrado.")
